@@ -1,0 +1,148 @@
+ ACTUARIAL RISK ANALYSIS: PHASE 1 EXPLORATORY DATA ANALYSIS
+
+
+ Query 1: Geographic Cost Distribution
+ Assessing if geography is a meaningful cost driver across regions.
+SELECT
+region,
+COUNT(PatientID) AS total_patients,
+ROUND(AVG(claim), 2) AS average_claim_cost
+FROM
+insurance_data
+GROUP BY
+region
+ORDER BY
+average_claim_cost DESC;
+
+
+ Query 2: Age Bracket Analysis
+ Grouping the dataset into five life-stage brackets to test age as a cost driver.
+SELECT
+CASE
+WHEN age BETWEEN 18 AND 24 THEN '18-24 (Young Adult)'
+WHEN age BETWEEN 25 AND 35 THEN '25-35 (Adult)'
+WHEN age BETWEEN 36 AND 45 THEN '36-45 (Middle Age)'
+WHEN age BETWEEN 46 AND 55 THEN '46-55 (Senior Adult)'
+ELSE '56+ (Elderly)'
+END AS age_bracket,
+COUNT(PatientID) AS total_patients,
+ROUND(AVG(claim), 2) AS average_claim_cost
+FROM
+insurance_data
+GROUP BY
+age_bracket
+ORDER BY
+average_claim_cost DESC;
+
+ Query 3: High-Severity Claims & Intersectional Risk
+Filtering for claims above $30,000 to find extreme financial exposures.
+SELECT
+age_bracket,
+bmi_category,
+smoker,
+COUNT(PatientID) AS high_cost_patients,
+ROUND(AVG(claim), 2) AS average_massive_claim
+FROM
+insurance_summary_view
+WHERE
+claim > 30000
+GROUP BY
+age_bracket, bmi_category, smoker
+ORDER BY
+average_massive_claim DESC
+LIMIT 5;
+
+
+-- Query 4: BMI and Diabetic Status
+-- Assessing if diabetes compounds weight-related costs.
+SELECT
+bmi_category,
+diabetic,
+COUNT(PatientID) AS total_people,
+ROUND(AVG(claim), 2) AS average_cost
+FROM
+insurance_data
+GROUP BY
+bmi_category, diabetic
+ORDER BY
+average_cost DESC;
+
+
+-- Query 5: Smoking Status Baseline
+-- Comparing average historical claims between smokers and non-smokers.
+SELECT
+smoker,
+COUNT(PatientID) AS total_patients,
+ROUND(AVG(claim), 2) AS average_claim_cost
+FROM
+insurance_data
+GROUP BY
+smoker
+ORDER BY
+average_claim_cost DESC;
+
+
+-- Query 6: BMI Category Baseline
+-- Establishing baseline costs across standard weight classes.
+SELECT
+CASE
+WHEN bmi < 18.5 THEN 'Underweight'
+WHEN bmi BETWEEN 18.5 AND 24.9 THEN 'Healthy'
+WHEN bmi BETWEEN 25.0 AND 29.9 THEN 'Overweight'
+ELSE 'Obese'
+END AS bmi_category,
+COUNT(PatientID) AS total_patients,
+ROUND(AVG(claim), 2) AS average_claim_cost
+FROM
+insurance_data
+GROUP BY
+bmi_category
+ORDER BY
+average_claim_cost DESC;
+
+
+-- Query 7: Family Size Impact
+-- Analyzing how the number of dependents (children) affects claim costs.
+SELECT
+children,
+COUNT(PatientID) AS total_patients,
+ROUND(AVG(claim), 2) AS average_claim_cost
+FROM
+insurance_data
+GROUP BY
+children
+ORDER BY
+children ASC;
+
+
+-- Query 8: Gender Baseline
+-- Checking if gender is a significant cost driver (later proven insignificant).
+SELECT
+gender,
+COUNT(PatientID) AS total_patients,
+ROUND(AVG(claim), 2) AS average_claim_cost
+FROM
+insurance_data
+GROUP BY
+gender
+ORDER BY
+average_claim_cost DESC;
+
+
+-- Query 9: Blood Pressure Risk
+-- Grouping blood pressure into tiers to see its independent effect on claims.
+SELECT
+CASE
+WHEN bloodpressure < 80 THEN 'Normal (<80)'
+WHEN bloodpressure BETWEEN 80 AND 89 THEN 'Elevated (80-89)'
+WHEN bloodpressure BETWEEN 90 AND 119 THEN 'High (90-119)'
+ELSE 'Hypertensive (120+)'
+END AS bp_tier,
+COUNT(PatientID) AS total_patients,
+ROUND(AVG(claim), 2) AS average_claim_cost
+FROM
+insurance_data
+GROUP BY
+bp_tier
+ORDER BY
+average_claim_cost DESC;
